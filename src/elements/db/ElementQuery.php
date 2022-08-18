@@ -2320,16 +2320,11 @@ class ElementQuery extends Query implements ElementQueryInterface
                     '[[structureelements.structureId]] = [[subquery.structureId]]',
                     ['exists', $existsQuery],
                 ]);
-            $existsQuery = (new Query())
-                ->from([Table::STRUCTURES])
-                ->where('[[id]] = [[structureelements.structureId]]')
-                ->andWhere(['dateDeleted' => null]);
             $this->subQuery
                 ->addSelect(['structureelements.structureId'])
                 ->leftJoin(['structureelements' => Table::STRUCTUREELEMENTS], [
                     'and',
                     '[[structureelements.elementId]] = [[elements.id]]',
-                    ['exists', $existsQuery],
                 ]);
         }
 
