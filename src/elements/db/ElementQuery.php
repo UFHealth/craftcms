@@ -2308,32 +2308,23 @@ class ElementQuery extends Query implements ElementQueryInterface
                 ['structureelements.structureId' => $this->structureId],
             ]);
         } else {
-            // $existsQuery = (new Query())
-            //     ->from([Table::STRUCTURES])
-            //     ->where('[[id]] = [[structureelements.structureId]]')
-            //     ->andWhere(['dateDeleted' => null]);
-            // $this->subQuery
-            //     ->addSelect(['structureelements.structureId'])
-            //     ->leftJoin(['structureelements' => Table::STRUCTUREELEMENTS], [
-            //         'and',
-            //         '[[structureelements.elementId]] = [[elements.id]]',
-            //         ['exists', $existsQuery],
-            //     ]);
-            $structureSubquery = (new Query())
-                ->addSelect([
-                    'structureelements.*',
-                ])
-                ->from([Table::STRUCTUREELEMENTS])
-                ->leftJoin(['structures' => Table::STRUCTURES], [
+            $this->query
+                ->addSelect(['structureelements.structureId'])
+                ->leftJoin(['structureelements' => Table::STRUCTUREELEMENTS], [
                     'and',
-                    '[[structureelements.structureId]] = [[structures.id]]',
-                    '[[structures.dateDeleted]] is null'
+                    '[[structureelements.elementId]] = [[subquery.elementsId]]',
+                    '[[structureelements.structureId]] = [[subquery.structureId]]',
                 ]);
+            $existsQuery = (new Query())
+                ->from([new Expression('[[structures]] use index()')])
+                ->where('[[id]] = [[structureelements.structureId]]')
+                ->andWhere(['dateDeleted' => null]);
             $this->subQuery
                 ->addSelect(['structureelements.structureId'])
-                ->leftJoin(['structureelements' => $structureSubquery], [
+                ->leftJoin(['structureelements' => Table::STRUCTUREELEMENTS], [
                     'and',
                     '[[structureelements.elementId]] = [[elements.id]]',
+                    ['exists', $existsQuery],
                 ]);
         }
 
