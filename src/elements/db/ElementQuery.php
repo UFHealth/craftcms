@@ -2308,21 +2308,30 @@ class ElementQuery extends Query implements ElementQueryInterface
                 ['structureelements.structureId' => $this->structureId],
             ]);
         } else {
-            $existsQuery = (new Query())
-                ->from([Table::STRUCTURES])
-                ->where('[[id]] = [[structureelements.structureId]]')
-                ->andWhere(['dateDeleted' => null]);
-            $this->query
-                ->addSelect(['structureelements.structureId'])
-                ->leftJoin(['structureelements' => Table::STRUCTUREELEMENTS], [
+            // $existsQuery = (new Query())
+            //     ->from([Table::STRUCTURES])
+            //     ->where('[[id]] = [[structureelements.structureId]]')
+            //     ->andWhere(['dateDeleted' => null]);
+            // $this->subQuery
+            //     ->addSelect(['structureelements.structureId'])
+            //     ->leftJoin(['structureelements' => Table::STRUCTUREELEMENTS], [
+            //         'and',
+            //         '[[structureelements.elementId]] = [[elements.id]]',
+            //         ['exists', $existsQuery],
+            //     ]);
+            $structureSubquery = (new Query())
+                ->addSelect([
+                    'structureelements.*',
+                ])
+                ->from([Table::STRUCTUREELEMENTS])
+                ->leftJoin(['structures' => Table::STRUCTURES], [
                     'and',
-                    '[[structureelements.elementId]] = [[subquery.elementsId]]',
-                    '[[structureelements.structureId]] = [[subquery.structureId]]',
-                    ['exists', $existsQuery],
+                    '[[structureelements.structureId]] = [[structures.id]]',
+                    '[[structures.dateDeleted]] is null'
                 ]);
             $this->subQuery
                 ->addSelect(['structureelements.structureId'])
-                ->leftJoin(['structureelements' => Table::STRUCTUREELEMENTS], [
+                ->leftJoin(['structureelements' => $structureSubquery], [
                     'and',
                     '[[structureelements.elementId]] = [[elements.id]]',
                 ]);
