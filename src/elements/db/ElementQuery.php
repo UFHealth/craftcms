@@ -2316,7 +2316,7 @@ class ElementQuery extends Query implements ElementQueryInterface
                     '[[structureelements.structureId]] = [[subquery.structureId]]',
                 ]);
             $existsQuery = (new Query())
-                ->from([new Expression('[[structures]] use index()')])
+                ->from([new Expression('[[structures]] use index(PRIMARY)')])
                 ->where('[[id]] = [[structureelements.structureId]]')
                 ->andWhere(['dateDeleted' => null]);
             $this->subQuery
